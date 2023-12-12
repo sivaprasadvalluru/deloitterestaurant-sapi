@@ -212,6 +212,7 @@ output application/json
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+		<flow-ref doc:name="getmenubyid" doc:id="144ef731-ce1f-43c8-a3ad-81911de70b32" name="getmenubyidFlow"/>
     </flow>
     <flow name="post:\restaurants\(id)\menus:application\json:restaurants-sapi-config">
         <ee:transform doc:name="Transform Message">

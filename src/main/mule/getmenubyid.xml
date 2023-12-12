@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getmenubyidFlow" doc:id="916497ea-b0a5-4856-80e6-aca2d85951a9" >
+		<db:select doc:name="Select" doc:id="3905e400-b2a3-42c0-a3fc-79562d96bcfb" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from menu where menu_id =:menuid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	menuid: vars.menuId as String
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="2b8532a3-6aee-4842-b1c3-e11ccad223aa" >
+			<when expression="#[sizeOf(payload)&gt; 0]">
+				<ee:transform doc:name="Transform Message" doc:id="71ae614b-e416-4882-8d09-b69c5ca7ba28">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+ payload map (item) ->{
+	menuId: item.menu_id,
+	name: item.menu_name,
+	restaurantId: item.restaurant_id,
+	links: [
+		{
+			linkName: "menuItems",
+			href: "/restaurants/"++ vars.id as String ++"/menus/" ++ vars.menuId as String ++ "/menuItems"
+		},
+		{
+			linkName: "restaurant",
+			href: "/restaurants/"++ vars.id as String 
+		}
+		
+	]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<set-variable value="MenuId entered is wrong.Page Not Found" doc:name="Set Variable" doc:id="52a9fc32-a073-49f3-a3aa-33d26ea2b53e" variableName="errormessage"/>
+				<raise-error doc:name="Raise error" doc:id="e3c7fe83-7642-4089-834f-ca452ce581ba" type="APP:NOTFOUND"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
