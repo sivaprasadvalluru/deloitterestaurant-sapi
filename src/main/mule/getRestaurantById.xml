@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getRestaurantByIdFlow" doc:id="b5edb884-5f68-402c-ac0b-77aa2d204c2b" >
+		<db:select doc:name="Select" doc:id="3aa5971a-e41e-4044-819b-fbe386323a07" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * from restaurant where restaurant_id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{id : vars.id as String}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="8966a473-b2c1-4265-bfd7-e382488556f8" >
+			<when expression="#[sizeOf(payload)&gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="c0430ab8-387e-44d9-a591-55fdd7544974">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{restaurant_id : payload[0].restaurant_id,
+name: payload[0].name,
+address: {
+		houseNumber: payload[0].house_number,
+		street: payload[0].street,
+		city: payload[0].city,
+		pincode: payload[0].pincode
+	},
+links: [
+	{
+		linkName: "menus",
+		href: "restaurants/"++ vars.id ++ "/menus"
+		
+	}
+]
+}
+]]></ee:set-payload>
+			</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatusCode" ><![CDATA[%dw 2.0
+output application/json
+---
+200
+]]></ee:set-variable>
+					</ee:variables>
+		</ee:transform>
+			</when>
+			<when expression="#[sizeOf(payload)&lt;=0]">
+				<raise-error doc:name="Raise error" doc:id="21cf1c63-4f03-4977-9211-cb3045201066" type="WEB:BADREQ" description="invalid restaurant id"/>
+			</when>
+			<otherwise>
+				<raise-error doc:name="Raise error" doc:id="bb67c485-b840-4c74-b60c-2ad7912b608c" type="SERVER:NOT_RUNNING" description="server is down"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

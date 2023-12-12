@@ -176,24 +176,9 @@ output application/json
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  name: "Udupi Garden",
-  address: {
-    "type": "object",
-    houseNumber: "202",
-    street: "Some Street",
-    city: "Bangalore",
-    pincode: "560066"
-  }
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
+		<flow-ref doc:name="getRestaurantById" doc:id="89c6166a-57f9-4c05-8afa-0239800bb347" name="getRestaurantByIdFlow"/>
+    
+</flow>
     <flow name="get:\restaurants\(id)\menus\(menuId):restaurants-sapi-config">
         <ee:transform doc:name="Transform Message">
             <ee:variables>

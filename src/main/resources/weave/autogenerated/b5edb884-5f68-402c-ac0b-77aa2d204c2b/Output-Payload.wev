@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_b5edb884_5f68_402c_ac0b_77aa2d204c2b_Output_Payload = {
+  address: {
+    pincode: String, 
+    city: String, 
+    street: String, 
+    houseNumber: String, 
+    _?: Any
+  }, 
+  name: String, 
+  _?: Any
+}
+
