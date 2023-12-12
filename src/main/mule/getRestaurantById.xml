@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getRestaurantByIdFlow" doc:id="61000d4a-4992-4d1d-9986-6d338f7d4abf" >
+		<db:select doc:name="Select" doc:id="dd22bd07-2fa5-47cd-b5a1-d3b8a31ae497" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from restaurant where restaurant_id = :id]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	id: attributes.uriParams.id as Number
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="e22a73eb-a550-4e62-af67-7886c2a2bc36" >
+			<when expression="#[sizeOf(payload) &gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="8496f2a5-6b7b-4e1c-87f2-651166a19fce">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item)->{
+	id: item.restaurant_id,
+	"name": item.name,
+	"address": {
+		"houseNumber": item.house_number,
+		"street": item.street,
+		"city": item.city,
+		"pincode": item.pincode
+	},
+	links:[
+		{
+      "linkname": "menus",
+      "href": "http://localhost:8081/restaurants/" ++ item.restaurant_id as String  ++"/menus"
+    }
+	]
+}
+	
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<set-variable value="404 not Found" doc:name="Set Variable" doc:id="cb13c4da-215d-4cdf-8ad8-d6e9ebdaebed" variableName="errormessage" />
+				<raise-error doc:name="Raise error" doc:id="71039862-543b-4d96-adc4-40dbe09b213a" type="APP:NOTFOUND" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

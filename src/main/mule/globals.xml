@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="9ecfbf58-0400-4ecb-b7a0-ba8169fed1e6" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="muletrainingdb" />
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="swiggydb" />
 	</db:config>
 	<configuration doc:name="Configuration" doc:id="8ba9a223-9118-4d46-97e3-f679f0907531" defaultErrorHandler-ref="globalsError_Handler" />
 	<error-handler name="globalsError_Handler" doc:id="16fe699f-91cf-4e7f-a0fe-267520041d65" >
