@@ -6,12 +6,13 @@
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="deleterestaurantFlow" doc:id="9d1a2234-0bc6-4d0d-8a32-c0498e32fb32" >
-		<db:delete doc:name="Delete" doc:id="e7894d8e-f168-4343-867f-d951db7c2267" config-ref="Database_Config">
+		<db:delete doc:name="Delete" doc:id="e7894d8e-f168-4343-867f-d951db7c2267" config-ref="DatabaseConfig">
 			<db:sql><![CDATA[DELETE from restaurant WHERE restaurant_id= :restaurant_id]]></db:sql>
 			<db:input-parameters><![CDATA[#[restaurant_id :attributes.uriParams.id]]]></db:input-parameters>
 		</db:delete>
 		<choice doc:name="Choice" doc:id="85608c5f-9f31-427d-a8db-a2e397d60584" >
-			<when expression="#[payload.affectedRows != 0]">
+			<when expression="#[payload != 0]">
+				<logger level="INFO" doc:name="Logger" doc:id="ce3d5302-7b6a-4796-b945-6546e12c6e6b" message="#[payload]" />
 				<ee:transform doc:name="Transform Message" doc:id="ff4886d0-87e0-4c3c-897b-e0fe894df661">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
