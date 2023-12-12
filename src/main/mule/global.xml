@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c85c1985-3cfe-43f3-b16b-fb0aaa9d8337" >
+		<db:my-sql-connection host="localhost" port="3306" user="${secure::db.user}" password="${secure::db.password}" database="muletrainingdb" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="2dff86d1-5bd2-49cb-ab6c-7b2af1000a15" file="db-dev.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="c5c01098-436b-44dd-a0bc-b0807b2c56ee" file="db-secure-dev.yaml" key="mulesoft" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<error-handler name="globalError_Handler" doc:id="e8b197b2-a9b9-428d-86d7-19ae30fd92b0" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5d5e8c3c-655d-46a4-9c64-8747b07b33fa" type="WEB:BADREQ" >
+			<set-variable value="404" doc:name="httpStatus -&gt; 40" doc:id="07ca31af-ee52-4184-90e4-bb09781ac941" variableName="404" />
+			<ee:transform doc:name="Transform Message" doc:id="ddcf7319-b9f9-411d-9652-e1eb104f92bd" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+message: error.description,
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="statusCode" ><![CDATA[%dw 2.0
+output application/json
+---
+404]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate1" doc:id="e7adb288-1b23-43f2-a2a8-d9831d6c7dfb" type="SERVER:NOT_RUNNING" >
+			<set-variable value="500" doc:name="httpStatus -&gt; 50" doc:id="63059ce0-7780-4194-b9c2-007ab5b2f7e5" variableName="500" />
+			<ee:transform doc:name="Transform Message" doc:id="056b0aa7-42f5-4429-b491-96e859a7b40a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message:error.description,
+	statusCode: 500
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>

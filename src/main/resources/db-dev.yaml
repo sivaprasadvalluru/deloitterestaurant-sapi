@@ -1,0 +1,5 @@
+db:
+  host: "localhost"
+  user: "root"
+  password: "ChrisNol@n12"
+  port: "3306"

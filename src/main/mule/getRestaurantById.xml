@@ -51,5 +51,39 @@ output application/json
 				<raise-error doc:name="Raise error" doc:id="bb67c485-b840-4c74-b60c-2ad7912b608c" type="SERVER:NOT_RUNNING" description="server is down"/>
 			</otherwise>
 		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cd9e12c8-7691-434a-85d4-7cf84b2bc0a1" type="SERVER:NOT_RUNNING">
+				<set-variable value="500" doc:name="httpStatus -&gt; 5" doc:id="1762a173-c38c-47ff-a370-25533f8c3b4f" variableName="500" />
+				<ee:transform doc:name="Transform Message" doc:id="c2282a01-bece-4352-90fc-0c0863e42e28">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message:error.description,
+	statusCode: 500
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate1" doc:id="b3b58664-19de-4741-83dc-c6f725c43a6a" type="WEB:BADREQ">
+				<set-variable value="404" doc:name="httpStatus -&gt; 4" doc:id="c7c9c59b-d375-4a69-b935-55a726f01f60" variableName="404" />
+				<ee:transform doc:name="Transform Message" doc:id="2cd973f7-cc83-49c0-8d86-e147863b88e7">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+message: error.description,
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="statusCode"><![CDATA[%dw 2.0
+output application/json
+---
+404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 </mule>
