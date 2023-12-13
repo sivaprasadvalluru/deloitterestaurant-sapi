@@ -6,12 +6,14 @@
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="getAllRestaurentsFlow" doc:id="8966ae10-cbb1-4bf0-a002-95b71e8e7220" >
-		<db:select doc:name="Select" doc:id="9f4042f1-01c3-4c6a-ac83-0fad6abf943a" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from restaurant]]></db:sql>
+		<choice doc:name="Choice" doc:id="555ff79e-4804-479a-b883-26fba491f53a" >
+			<when expression="#[attributes.queryParams.name == null]">
+				<db:select doc:name="Select" doc:id="9f4042f1-01c3-4c6a-ac83-0fad6abf943a" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from restaurant]]></db:sql>
 		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="113ae783-09c1-4906-9031-1a3cd77a0b4c" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+				<ee:transform doc:name="Transform Message" doc:id="113ae783-09c1-4906-9031-1a3cd77a0b4c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload map (item)->{
@@ -32,5 +34,51 @@ payload map (item)->{
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+			</when>
+			<when expression="#[attributes.queryParams.name != null]">
+				<db:select doc:name="Select" doc:id="10c78d89-77a2-48ea-9f2f-1df097c2b241" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from restaurant where name = :name]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	name: attributes.queryParams.name as String
+}]]]></db:input-parameters>
+		</db:select>
+				<choice doc:name="Choice" doc:id="4a2e6e4e-e166-4284-8b88-46149eeb1105">
+			<when expression="#[sizeOf(payload) &gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="a75f9df5-b5ed-4ce3-a2bd-25be69241e6a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item)->{
+	id: item.restaurant_id,
+	"name": item.name,
+	"address": {
+		"houseNumber": item.house_number,
+		"street": item.street,
+		"city": item.city,
+		"pincode": item.pincode
+	},
+	links:[
+		{
+      "linkname": "menus",
+      "href": "http://localhost:8081/restaurants/" ++ item.restaurant_id as String  ++"/menus"
+    }
+	]
+}
+	
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<set-variable value="404 not Found" doc:name="Set Variable" doc:id="79cdf28f-31be-4de7-bb45-2f7f7a1d21b0" variableName="errormessage" />
+				<raise-error doc:name="Raise error" doc:id="09b1da28-1b59-4517-9906-b690ed7aae0a" type="APP:NOTFOUND" />
+			</otherwise>
+		</choice>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="d1784103-8dda-461d-be6a-00b0d2fe13fe" message="default case"/>
+			</otherwise>
+		</choice>
 	</flow>
 </mule>

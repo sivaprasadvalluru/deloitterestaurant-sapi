@@ -177,7 +177,6 @@ output application/json
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-		<flow-ref doc:name="Flow Reference" doc:id="eb37c3bf-a55a-419e-9488-bc829a8c65ff" name="getRestaurantByIdFlow"/>
     </flow>
     <flow name="get:\restaurants\(id)\menus\(menuId):restaurants-sapi-config">
         <ee:transform doc:name="Transform Message">
